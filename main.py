@@ -41,32 +41,54 @@ class Projection:
 
 
 class VideoStream:
-    # From https://stackoverflow.com/questions/55099413/python-opencv-streaming-from-camera-multithreading-timestamps/55131226
+    """
+    A class for capturing video frames from a camera using OpenCV and threading.
+
+    Args:
+        src (int): The index of the camera source. Defaults to 0.
+        frame_width (int): The width of the captured frames. Defaults to 800.
+        frame_height (int): The height of the captured frames. Defaults to 600.
+
+    Attributes:
+        _capture (cv2.VideoCapture): The OpenCV VideoCapture object for capturing video frames.
+        frame_width (int): The width of the captured frames.
+        frame_height (int): The height of the captured frames.
+        _thread (threading.Thread): A thread for capturing video frames.
+        _status (bool): A flag indicating whether the capture is successful or not.
+        _frame (numpy.ndarray): The captured frame.
+
+    Methods:
+        __init__(src, frame_width, frame_height): Initializes a new VideoStream object.
+        update(): Captures video frames in a different thread and updates the status and frame attributes.
+        release(): Releases the VideoCapture object.
+        get_frame(): Returns the current captured frame.
+    """
     def __init__(self, src=0, frame_width=800, frame_height=600):
-        self.capture = cv2.VideoCapture(src)
+        self._capture = cv2.VideoCapture(src)
         self.frame_width = frame_width
         self.frame_height = frame_height
 
-        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
-        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
+        # Set frame width and height
+        self._capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
+        self._capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
 
         # Start capture thread
-        self.thread = Thread(target=self.update, args=())
-        self.thread.daemon = True
-        self.thread.start()
+        self._thread = Thread(target=self.update, args=())
+        self._thread.daemon = True
+        self._thread.start()
 
-        self.status = False
-        self.frame = None
+        self._status = False
+        self._frame = None
 
         # Ensure capture has started
-        while self.status is False:
+        while self._status is False:
             time.sleep(.1)
 
     def update(self):
-        # Read the next frame from the stream in a different thread
+        # Read the frames in a different thread
         while True:
-            if self.capture.isOpened():
-                self.status, self.frame = self.capture.read()
+            if self._capture.isOpened():
+                self._status, self._frame = self._capture.read()
 
             key = cv2.waitKey(1)
             if key == ord('q'):
@@ -74,16 +96,15 @@ class VideoStream:
 
             time.sleep(.05)
 
-        self.capture.release()
+        self._capture.release()
         cv2.destroyAllWindows()
         exit(1)
 
     def release(self):
-        self.capture.release()
+        self._capture.release()
 
     def get_frame(self):
-        print(f'{self.frame.shape}')
-        return [self.frame]
+        return [self._frame]
 
 
 class Camera:
@@ -175,7 +196,13 @@ class InverseProblem:
     def __init__(self, cameras: list[Camera]):
         self.cameras = cameras
 
-    def compute_inverse(self, projection: list[Projection]):
+    def compute_inverse(self, projection: list[Projection]) -> Point:
+        """
+        Compute the inverse of the projection problem to estimate the 3D point from the 2D porjection in the camera images.
+
+        :param projection: A list of Projections for each camera.
+        :return: The estimated Point in the global coordinate system.
+        """
         M = None
 
         # Create linear system for the inverse problem
@@ -193,13 +220,25 @@ class InverseProblem:
 
 
 def exit_handler(cameras):
-    print('My application is ending!')
+    """
+    This function is called when the program exits to release the video streams and close all windows.
+
+    :param cameras: A list of Camera objects that have been initialized with a VideoStream object.
+    """
     for camera in cameras:
-        camera.video_stream.release()
+        if camera.video_stream is not None:
+            camera.video_stream.release()
     cv2.destroyAllWindows()
 
 
 def plot_reconstruction(ax, reconstruction_points, object_mapping):
+    """
+    Plots the reconstructed points in 3D space.
+
+    :param ax: Matplotlib axis to plot on.
+    :param reconstruction_points: List of Point objects representing the reconstructed points.
+    :param object_mapping: ObjectMapping instance containing information about colors and junctions for visualization.
+    """
     if len(reconstruction_points) > 0:
         x, y, z = [p.x1 for p in reconstruction_points], [p.x2 for p in reconstruction_points], [p.x3 for p in reconstruction_points]
 
@@ -222,6 +261,14 @@ def plot_reconstruction(ax, reconstruction_points, object_mapping):
 
 
 def main():
+    """
+    Main function that initializes cameras, loads a YOLO model for pose detection, and continuously reads frames from the camera streams.
+    It detects keypoints in each frame, computes the 3D reconstruction of the detected objects using the inverse problem,
+    and plots the reconstructed points in 3D space. The program runs until the 'q' key is pressed or an exception occurs.
+
+    :return: None
+    """
+
     focal_length = 1.08  # From BRIO 100 specs
 
     # Instantiate cameras
@@ -242,7 +289,6 @@ def main():
     object_mapping = ObjectMapping(object_type)
 
     # Load YOLO model
-    # model = YOLO('yolo-Weights/yolo11s-pose.pt')
     model = None
     if object_type == "body":
         model = YOLO('yolo-Weights/yolo11s-pose.pt')
@@ -251,8 +297,6 @@ def main():
 
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
-    # body, = ax.plot([], [], [], "ro")  # single point
-    scatter = ax.scatter([], [], [], c="r", marker="o")
 
     plt.ion()
     plt.show()
