@@ -33,7 +33,7 @@ $\begin{bmatrix} \mathbf{p}_c \\ 1 \end{bmatrix} = \begin{bmatrix} \mathbf{R} & 
 
 where  
 - $\mathbf{R} \in \mathbb{R}^{3\times 3}$ is the rotation from world to camera axes,  
-- $\mathbf{t} = -\mathbf{R}\mathbf{c} $ is the translation vector,  
+- $\mathbf{t} = -\mathbf{R}\mathbf{c}$ is the translation vector,  
 - $\mathbf{p}_c = \begin{bmatrix} \mathit{x}_c,  \mathit{y}_c , \mathit{z}_c \end{bmatrix}^T$ are the coordinates of the point relative to the camera's coordinate system.  
 
 
