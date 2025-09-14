@@ -23,18 +23,18 @@ This project implements a multi-camera system for 3D human pose estimation. Usin
 The reconstruction process is based on the pinhole camera model and the transformation between the global coordinate system and each camera’s local coordinate system.
 
 ### 1. Coordinate transformation
-A 3D point in the global coordinate system $(X, Y, Z)$ is denoted by $\mathbf{p} = \begin{bmatrix} \mathit{x}, \mathit{y},   \mathit{z} \end{bmatrix}^T$.
+A 3D point in the global coordinate system $(X, Y, Z)$ is denoted by $\mathbf{p} = \begin{bmatrix} \mathit{x}, \mathit{y},   \mathit{z} \end{bmatrix}^{T}$.
 
-The camera is defined by its position $\mathbf{c}$ and the view direction vector, or forward vector, $\mathbf{f}$, which is aligned with the camera’s optical axis (the camera’s local $Z_c$-axis).
+The camera is defined by its position $\mathbf{c}$ and the view direction vector, or forward vector, $\mathbf{f}$, which is aligned with the camera’s optical axis (the camera’s local $Z_{c}$-axis).
 
 The corresponding point in the camera coordinate system is obtained by translating and rotating the global point through the following homogeneous transformation:
 
-$\begin{bmatrix} \mathbf{p}_c \\ 1 \end{bmatrix} = \begin{bmatrix} \mathbf{R} & \mathbf{t} \\ \mathbf{0}^T & 1 \end{bmatrix} \begin{bmatrix} \mathbf{p} \\ 1 \end{bmatrix}$
+$$\begin{bmatrix} \mathbf{p}_{c} \\ 1 \end{bmatrix} = \begin{bmatrix} \mathbf{R} & \mathbf{t} \\ \mathbf{0}^{T} & 1 \end{bmatrix} \begin{bmatrix} \mathbf{p} \\ 1 \end{bmatrix}$$
 
 where  
 - $\mathbf{R} \in \mathbb{R}^{3\times 3}$ is the rotation from world to camera axes,  
 - $\mathbf{t} = -\mathbf{R}\mathbf{c}$ is the translation vector,  
-- $\mathbf{p}_c = \begin{bmatrix} \mathit{x}_c,  \mathit{y}_c , \mathit{z}_c \end{bmatrix}^T$ are the coordinates of the point relative to the camera's coordinate system.  
+- $\mathbf{p}_{c} = \begin{bmatrix} \mathit{x}_{c},  \mathit{y}_{c} , \mathit{z}_{c} \end{bmatrix}^{T}$ are the coordinates of the point relative to the camera's coordinate system.  
 
 
 This step is illustrated in the following figure (world coordinate system on the left, camera-centered axes on the right).
@@ -43,7 +43,7 @@ This step is illustrated in the following figure (world coordinate system on the
 
 
 ### 2. Pinhole projection model
-In the camera coordinate system, the 3D point $\mathbf{p}_c$ is projected onto the 2D image plane at depth $f$ (the focal length). The projection is given by:
+In the camera coordinate system, the 3D point $\mathbf{p}_{c}$ is projected onto the 2D image plane at depth $f$ (the focal length). The projection is given by:
 
 $x' = f \, \frac{x_c}{z_c}, \qquad y' = f \, \frac{y_c}{z_c},$
 
@@ -60,33 +60,34 @@ Once 2D keypoints are detected in multiple camera views, the goal is to reconstr
 
 The $i$-th camera maps a 3D world point $\mathbf{p} = [x, y, x]^T$ into its 2D image plane through the projection equation
 
-$\mathbf{p}_i' = \begin{bmatrix}  x_i' \\ y_i' \end{bmatrix} = \frac{f^{(i)}}{\mathit{z}_c^{(i)}} \begin{bmatrix}  \mathit{x}_c^{(i)} \\ \mathit{y}_c^{(i)} \end{bmatrix}$  
+$$\mathbf{p}_{i}' = \begin{bmatrix}  x_{i}' \\ y_{i}' \end{bmatrix} = \frac{f^{(i)}}{\mathit{z}_{c}^{(i)}} \begin{bmatrix}  \mathit{x}_{c}^{(i)} \\ \mathit{y}_{c}^{(i)} \end{bmatrix}
+$$ 
 
-where $\mathbf{p}_c^{(i)} = [\mathit{x}_c^{(i)}, \mathit{y}_c^{(i)}, \mathit{z}_c^{(i)}]^T$ are the coordinates of point $\mathbf{p}$ in the camera coordinate system, which are obtained from
+where $\mathbf{p}_{c}^{(i)} = [\mathit{x}_{c}^{(i)}, \mathit{y}_{c}^{(i)}, \mathit{z}_{c}^{(i)}]^{T}$ are the coordinates of point $\mathbf{p}$ in the camera coordinate system, which are obtained from
 
-$\begin{bmatrix} \mathbf{p}_c^{(i)} \\ 1 \end{bmatrix} = \begin{bmatrix} \mathbf{R}^{(i)} & \mathbf{t}^{(i)} \\ \mathbf{0}^T & 1 \end{bmatrix} \begin{bmatrix} \mathbf{p} \\ 1 \end{bmatrix}$.
+$$\begin{bmatrix} \mathbf{p}_{c}^{(i)} \\ 1 \end{bmatrix} = \begin{bmatrix} \mathbf{R}^{(i)} & \mathbf{t}^{(i)} \\ \mathbf{0}^{T} & 1 \end{bmatrix} \begin{bmatrix} \mathbf{p} \\ 1 \end{bmatrix}.$$
 
 The 2D projection equation can be rewritten as:
 
-$\begin{bmatrix}  x_i' \\ y_i' \end{bmatrix} = \frac{f^{(i)}}{{\mathbf{r}_z^{(i)}}^T \mathbf{p}-t_z^{(i)}} \begin{bmatrix}  {\mathbf{r}_x^{(i)}}^T \mathbf{p}-t_x^{(i)}  \\ {\mathbf{r}_y^{(i)}}^T \mathbf{p}-t_y^{(i)} \end{bmatrix}$ 
+$$\begin{bmatrix}  x_{i}' \\ y_{i}' \end{bmatrix} = \frac{f^{(i)}}{{\mathbf{r}_{z}^{(i)}}^{T} \mathbf{p}-t_{z}^{(i)}} \begin{bmatrix}  {\mathbf{r}_{x}^{(i)}}^{T} \mathbf{p}-t_{x}^{(i)}  \\ {\mathbf{r}_{y}^{(i)}}^{T} \mathbf{p}-t_{y}^{(i)} \end{bmatrix}$$
 
 where 
-$\mathbf{R} = \begin{bmatrix} {\mathbf{r}_x^{(i)}}^T, {\mathbf{r}_y^{(i)}}^T, {\mathbf{r}_z^{(i)}}^T  \end{bmatrix}^T$ 
+$\mathbf{R} = \begin{bmatrix} {\mathbf{r}_{x}^{(i)}}^{T}, {\mathbf{r}_{y}^{(i)}}^{T}, {\mathbf{r}_{z}^{(i)}}^{T}  \end{bmatrix}^{T}$ 
 and
-$\mathbf{t} = [t_x^{(i)}, t_y^{(i)}, t_z^{(i)}]^T$.
+$\mathbf{t} = [t_{x}^{(i)}, t_{y}^{(i)}, t_{z}^{(i)}]^{T}$.
 
 Rearranging these equations leads to the following linear system:
 
-$\begin{bmatrix}  x_i' {\mathbf{r}_z^{(i)}} - f^{(i)} {\mathbf{r}_x^{(i)}}  \\ y_i' {\mathbf{r}_z^{(i)}} -f^{(i)} {\mathbf{r}_y^{(i)}} \end{bmatrix} \mathbf{p} = \begin{bmatrix}  x_i't_z^{(i)} - f^{(i)} t_x^{(i)}  \\  y_i' t_z^{(i)} - f^{(i)} t_y^{(i)} \end{bmatrix}$ 
+$\begin{bmatrix}  x_{i}' {\mathbf{r}_{z}^{(i)}} - f^{(i)} {\mathbf{r}_{x}^{(i)}}  \\ y_{i}' {\mathbf{r}_{z}^{(i)}} -f^{(i)} {\mathbf{r}_{y}^{(i)}} \end{bmatrix} \mathbf{p} = \begin{bmatrix}  x_{i}'t_{z}^{(i)} - f^{(i)} t_{x}^{(i)}  \\  y_{i}' t_{z}^{(i)} - f^{(i)} t_{y}^{(i)} \end{bmatrix}$ 
 
 By stacking the equations from multiple cameras, the system becomes overdetermined. The 3D point $\mathbf{p}$ can then be recovered by solving
 
 $\hat{\mathbf{p}} = \arg\min_{\mathbf{p}} \|\mathbf{A}\mathbf{p} - \mathbf{b}\|_2,$
 
 where
-$\mathbf{A} = \begin{bmatrix}  x_0' {\mathbf{r}_z^{(0)}} - f^{(0)} {\mathbf{r}_x^{(0)}}  \\ y_0' {\mathbf{r}_z^{(0)}} -f^{(0)} {\mathbf{r}_y^{(0)}} \\ \vdots \\  x_n' {\mathbf{r}_z^{(n)}} - f^{(n)} {\mathbf{r}_x^{(n)}}  \\ y_n' {\mathbf{r}_z^{(n)}} -f^{(n)} {\mathbf{r}_y^{(n)}} \end{bmatrix}$ 
+$\mathbf{A} = \begin{bmatrix}  x_{0}' {\mathbf{r}_{z}^{(0)}} - f^{(0)} {\mathbf{r}_{x}^{(0)}}  \\ y_{0}' {\mathbf{r}_{z}^{(0)}} -f^{(0)} {\mathbf{r}_{y}^{(0)}} \\ \vdots \\  x_{n}' {\mathbf{r}_{z}^{(n)}} - f^{(n)} {\mathbf{r}_{x}^{(n)}}  \\ y_{n}' {\mathbf{r}_{z}^{(n)}} -f^{(n)} {\mathbf{r}_{y}^{(n)}} \end{bmatrix}$ 
 and 
-$\mathbf{b} = \begin{bmatrix}  x_0't_z^{(0)} - f^{(0)} t_x^{(0)}  \\  y_i' t_z^{(0)} - f^{(0)} t_y^{(0)} \\ \vdots \\   x_n't_z^{(n)} - f^{(n)} t_x^{(n)}  \\  y_n' t_z^{(n)} - f^{(n)} t_y^{(n)} \end{bmatrix},$ 
+$\mathbf{b} = \begin{bmatrix}  x_{0}'t_{z}^{(0)} - f^{(0)} t_{x}^{(0)}  \\  y_{0}' t_{z}^{(0)} - f^{(0)} t_{y}^{(0)} \\ \vdots \\   x_{n}'t_{z}^{(n)} - f^{(n)} t_{x}^{(n)}  \\  y_{n}' t_{z}^{(n)} - f^{(n)} t_{y}^{(n)} \end{bmatrix},$ 
 
 which in practice reduces to solving a least-squares linear system.
 
