@@ -149,3 +149,7 @@ The project is organized into several core components that handle video capture,
 - Improve handling of occlusion and missing keypoints.  
 - Enable saving or exporting 3D reconstructions for offline analysis.
 - Explore additional applications such as sports analytics, gesture recognition, or robotics.  
+
+
+## License
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
