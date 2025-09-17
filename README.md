@@ -23,7 +23,7 @@ This project implements a multi-camera system for 3D human pose estimation. Usin
 The reconstruction process is based on the pinhole camera model and the transformation between the global coordinate system and each camera’s local coordinate system.
 
 ### 1. Coordinate transformation
-A 3D point in the global coordinate system $(X, Y, Z)$ is denoted by $\mathbf{p} = \begin{bmatrix} \mathit{x}, \mathit{y},   \mathit{z} \end{bmatrix}^{T}$.
+A 3D point in the global coordinate system $(X, Y, Z)$ is denoted by $`\mathbf{p} = \begin{bmatrix} \mathit{x}, \mathit{y}, \mathit{z} \end{bmatrix}^{T}`$.
 
 The camera is defined by its position $\mathbf{c}$ and the view direction vector, or forward vector, $\mathbf{f}$, which is aligned with the camera’s optical axis (the camera’s local $Z_{c}$-axis).
 
@@ -33,9 +33,9 @@ The corresponding point in the camera coordinate system is obtained by translati
 \begin{bmatrix} \mathbf{p}_{c} \\ 1 \end{bmatrix} = \begin{bmatrix} \mathbf{R} & \mathbf{t} \\ \mathbf{0}^{T} & 1 \end{bmatrix} \begin{bmatrix} \mathbf{p} \\ 1 \end{bmatrix}
 ```
 where  
-- $\mathbf{R} \in \mathbb{R}^{3\times 3}$ is the rotation from world to camera axes,  
-- $\mathbf{t} = -\mathbf{R}\mathbf{c}$ is the translation vector,  
-- $\mathbf{p}_{c}=\begin{bmatrix}\mathit{x}_{c},\mathit{y}_{c},\mathit{z}_{c}\end{bmatrix}^{T}$ are the coordinates of the point relative to the camera's coordinate system.  
+- $`\mathbf{R} \in \mathbb{R}^{3\times 3}`$ is the rotation from world to camera axes,  
+- $`\mathbf{t} = -\mathbf{R}\mathbf{c}`$ is the translation vector,  
+- $`\mathbf{p}_{c}= \begin{bmatrix} \mathit{x}_{c}, \mathit{y}_{c}, \mathit{z}_{c} \end{bmatrix}^{T}`$ are the coordinates of the point relative to the camera's coordinate system.  
 
 
 This step is illustrated in the following figure (world coordinate system on the left, camera-centered axes on the right).
@@ -46,11 +46,11 @@ This step is illustrated in the following figure (world coordinate system on the
 ### 2. Pinhole projection model
 In the camera coordinate system, the 3D point $\mathbf{p}_{c}$ is projected onto the 2D image plane at depth $f$ (the focal length). The projection is given by:
 
-$x' = f \frac{x_c}{z_c}, \qquad y' = f \frac{y_c}{z_c},$
+$`x' = f \frac{x_c}{z_c}, \qquad y' = f \frac{y_c}{z_c}`$,
 
-where $(x',y')$ are the image plane coordinates of the projection $\mathbf{p}'$.  
+where $`(x',y')`$ are the image plane coordinates of the projection $`\mathbf{p}'`$.  
 
-This is illustrated in the following figure, where the line of sight from the camera center $C$ to the 3D point $\mathbf{p}$ intersects the image plane at $\mathbf{p}'$.
+This is illustrated in the following figure, where the line of sight from the camera center $C$ to the 3D point $`\mathbf{p}`$ intersects the image plane at $`\mathbf{p}'`$.
 
 ![Coordinate Transformation](images/pinhole_projection.png)
 
@@ -59,13 +59,13 @@ This is illustrated in the following figure, where the line of sight from the ca
 
 Once 2D keypoints are detected in multiple camera views, the goal is to reconstruct their 3D position in the global coordinate system.
 
-The $i$-th camera maps a 3D world point $\mathbf{p} = [x, y, x]^T$ into its 2D image plane through the projection equation
+The $i$-th camera maps a 3D world point $`\mathbf{p} = [x, y, x]^T`$ into its 2D image plane through the projection equation
 
 ```math
 \mathbf{p}_{i}' = \begin{bmatrix}  x_{i}' \\ y_{i}' \end{bmatrix} = \frac{f^{(i)}}{\mathit{z}_{c}^{(i)}} \begin{bmatrix}  \mathit{x}_{c}^{(i)} \\ \mathit{y}_{c}^{(i)} \end{bmatrix}
 ```
 
-where $\mathbf{p}_{c}^{(i)}=[\mathit{x}_{c}^{(i)},\mathit{y}_{c}^{(i)},\mathit{z}_{c}^{(i)}]^{T}$ are the coordinates of point $\mathbf{p}$ in the camera coordinate system, which are obtained from
+where $`\mathbf{p}_{c}^{(i)}=[\mathit{x}_{c}^{(i)},\mathit{y}_{c}^{(i)},\mathit{z}_{c}^{(i)}]^{T}`$ are the coordinates of point $`\mathbf{p}`$ in the camera coordinate system, which are obtained from
 
 ```math
 \begin{bmatrix} \mathbf{p}_{c}^{(i)} \\ 1 \end{bmatrix} = \begin{bmatrix} \mathbf{R}^{(i)} & \mathbf{t}^{(i)} \\ \mathbf{0}^{T} & 1 \end{bmatrix} \begin{bmatrix} \mathbf{p} \\ 1 \end{bmatrix}.
@@ -78,9 +78,9 @@ The 2D projection equation can be rewritten as:
 ```
 
 where 
-$\mathbf{R}=\begin{bmatrix} {\mathbf{r}_{x}^{(i)}}^{T},{\mathbf{r}_{y}^{(i)}}^{T},{\mathbf{r}_{z}^{(i)}}^{T}\end{bmatrix}^{T}$ 
+$`\mathbf{R} = \begin{bmatrix} {\mathbf{r}_{x}^{(i)}}^{T}, {\mathbf{r}_{y}^{(i)}}^{T}, {\mathbf{r}_{z}^{(i)}}^{T} \end{bmatrix}^{T}`$ 
 and
-$\mathbf{t}=\begin{bmatrix}t_{x}^{(i)},t_{y}^{(i)},t_{z}^{(i)}\end{bmatrix}^{T}$.
+$`\mathbf{t}=\begin{bmatrix}t_{x}^{(i)},t_{y}^{(i)},t_{z}^{(i)}\end{bmatrix}^{T}`$.
 
 Rearranging these equations leads to the following linear system:
 
@@ -88,7 +88,7 @@ Rearranging these equations leads to the following linear system:
 \begin{bmatrix}  x_{i}' {\mathbf{r}_{z}^{(i)}} - f^{(i)} {\mathbf{r}_{x}^{(i)}}  \\ y_{i}' {\mathbf{r}_{z}^{(i)}} -f^{(i)} {\mathbf{r}_{y}^{(i)}} \end{bmatrix} \mathbf{p} = \begin{bmatrix}  x_{i}'t_{z}^{(i)} - f^{(i)} t_{x}^{(i)}  \\  y_{i}' t_{z}^{(i)} - f^{(i)} t_{y}^{(i)} \end{bmatrix}
 ```
 
-By stacking the equations from multiple cameras, the system becomes overdetermined. The 3D point $\mathbf{p}$ can then be recovered by solving
+By stacking the equations from multiple cameras, the system becomes overdetermined. The 3D point $`\mathbf{p}`$ can then be recovered by solving
 
 ```math
 \hat{\mathbf{p}} = \arg\min_{\mathbf{p}} \|\mathbf{A}\mathbf{p} - \mathbf{b}\|_2,
